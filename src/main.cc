@@ -26,6 +26,7 @@ main(int argc, char** argv)
     {
         cuda_naive_mandel_2d(pix, w, h, size);
         win.render(pix);
+        win.display_stat("zoom", 1/size*10);
         size *= 0.9974;
     }
 

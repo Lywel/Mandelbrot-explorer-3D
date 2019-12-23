@@ -191,7 +191,7 @@ cuda_naive_mandel_2d(rgba8_t* hostBuffer, int width, int height, float size)
         cuda_compute_LUT<<<max_iter + 1, 1>>>(hist, max_iter, LUT);
 
         // Apply LUT
-        cuda_apply_LUT<<<dimGrid, dimBlock>>>(colors, width, height, 255, iters, LUT);
+        cuda_apply_LUT<<<dimGrid, dimBlock>>>(colors, width, height, max_iter, iters, LUT);
     }
 
     // Copy back to main memory

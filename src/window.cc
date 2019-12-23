@@ -76,8 +76,9 @@ Window::input_pool()
 }
 
 void
-Window::render_infos(const std::string &str)
+Window::render_infos()
 {
+    const std::string str = infos.str();
     SDL_Surface* info_surface = NULL;
     SDL_Texture* info_texture = NULL;
     SDL_Color info_color{0, 0, 0, 255};
@@ -102,6 +103,8 @@ Window::render_infos(const std::string &str)
 
     SDL_FreeSurface(info_surface);
     SDL_DestroyTexture(info_texture);
+    infos.str("");
+    infos.clear();
 }
 
 void
@@ -112,22 +115,26 @@ Window::render(void* pixels)
     startclock = SDL_GetTicks();
     if ( deltaclock != 0 )
         currentFPS = 1000 / deltaclock;
-    std::ostringstream infos;
-    infos << "FPS: " << currentFPS << std::endl;
-    infos << "global time: " << deltaclock << "ms" << std::endl;
 
-    Uint32 s = SDL_GetTicks();
+    display_stat("FPS", currentFPS);
+    display_stat("global time (ms)", deltaclock);
 
     // Update with pixels
     SDL_RenderClear(renderer);
     SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(rgba8_t));
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 
-    Uint32 r = SDL_GetTicks() - s;
-
-    infos << "update texture time: " << r << "ms" << std::endl;
-
-    render_infos(infos.str());
+    render_infos();
 
     SDL_RenderPresent(renderer);
+}
+
+void
+Window::display_stat(const std::string &name, float value)
+{
+    infos << name << ": "
+        << std::fixed
+        << std::setprecision(2)
+        << value
+        << std::endl;
 }

@@ -2,6 +2,7 @@
 #include "color.h"
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
@@ -18,6 +19,8 @@ public:
     void render(void* pixels);
     bool input_pool();
 
+    void display_stat(const std::string &name, float value);
+
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Texture* texture = NULL;
@@ -26,7 +29,9 @@ public:
     const char* title;
 
 private:
-    void render_infos(const std::string &str);
+    void render_infos();
+
+    std::ostringstream infos;
 
     TTF_Font* info_font = NULL;
 
