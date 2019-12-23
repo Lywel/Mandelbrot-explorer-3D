@@ -1,3 +1,4 @@
+#pragma once
 #include <memory>
 #include <iostream>
 #include "color.h"
@@ -10,4 +11,5 @@ void cuda_naive_mandel_2d(rgba8_t* pix, int width, int height, float size);
 
 template<typename T>
 void check(T result, char const *const func, const char *const file, int const line);
+
 #define checkCudaErrors(val) check ( (val), #val, __FILE__, __LINE__ )

@@ -5,12 +5,15 @@ gpu_available(bool debug)
 {
     int dev_nb;
 
-    cudaGetDeviceCount(&dev_nb);
+    cudaError_t err = cudaGetDeviceCount(&dev_nb);
 
-    if (!dev_nb)
+    if (dev_nb < 1 || err)
     {
         if (debug)
-            std::cout << "No GPU available." << std::endl;
+        {
+            std::cout << cudaGetErrorName(err)
+                << ": " << cudaGetErrorString(err) << std::endl;
+        }
         return false;
     }
 

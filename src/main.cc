@@ -1,5 +1,5 @@
 #include "window.h"
-#include "mandel.h"
+#include "mandel_2d.h"
 #include "color.h"
 #include "check_cuda.h"
 
@@ -11,8 +11,8 @@ main(int argc, char** argv)
 {
     bool cuda_enabled = gpu_available(true);
 
-    if (!cuda_enabled)
-        exit(1);
+    /* if (!cuda_enabled) */
+    /*     exit(1); */
 
     int w = 1920;
     int h = 1080;
@@ -24,10 +24,15 @@ main(int argc, char** argv)
 
     while (!win.input_pool())
     {
-        cuda_naive_mandel_2d(pix, w, h, size);
-        win.render(pix);
+        /* if (cuda_enabled) */
+        /*     cuda_naive_mandel_2d(pix, w, h, size); */
+        /* else */
+        /*     cpu_naive_mandel_2d(pix, w, h, size); */
+
+        size *= 0.9975;
+
         win.display_stat("zoom", 1/size*10);
-        size *= 0.9974;
+        win.render(pix);
     }
 
     return 0;

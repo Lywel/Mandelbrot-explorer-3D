@@ -1,4 +1,4 @@
-#include "mandel.h"
+#include "mandel_2d.h"
 
 template<typename T>
 void check(T result, char const *const func, const char *const file, int const line)
@@ -85,11 +85,12 @@ cpu_naive_mandel_iter(std::uint8_t* iters, int width, int height, int max_iter, 
 __host__ void
 cpu_naive_mandel_2d(rgba8_t* pix, int width, int height, float size)
 {
-    std::uint8_t iters[width * height];
+    std::uint8_t* iters = new std::uint8_t[width * height];
     cpu_naive_mandel_iter(iters, width, height, 255, size);
     for (int i = 0; i < height; ++i)
         for (int j = 0; j < width; ++j)
             pix[i * width + j] = heat_lut(iters[i * width + j] / 255.f);
+    delete iters;
 }
 
 

@@ -81,7 +81,7 @@ Window::render_infos()
     const std::string str = infos.str();
     SDL_Surface* info_surface = NULL;
     SDL_Texture* info_texture = NULL;
-    SDL_Color info_color{0, 0, 0, 255};
+    SDL_Color info_color{0, 125, 125, 255};
     SDL_Rect info_rect{0, 0, 0, 0};
     int prev_info_h = 0;
 
