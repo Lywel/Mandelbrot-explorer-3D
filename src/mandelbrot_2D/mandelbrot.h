@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <iostream>
-#include "color.h"
+#include "../color.h"
 
 const float mandel_center_x = -1.401155; // -0.1011;
 const float mandel_center_y = 0; // 0.9563;

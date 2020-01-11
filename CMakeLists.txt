@@ -7,15 +7,15 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 # Compilation flags
-set(CXXFLAGS -Wall -Wextra -pedantic)
+set(CXXFLAGS -Wall -Wextra -pedantic -Og -std=c++17)
+set(CUDAFLAGS "--compiler-options=-Wall -Wextra -Og")
 add_compile_options(
   "$<$<COMPILE_LANGUAGE:CXX>:${CXXFLAGS}>"
+  "$<$<COMPILE_LANGUAGE:CUDA>:${CUDAFLAGS}>"
 )
 
 # System requirements
 find_package (CUDA REQUIRED)
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}" "--ptxas-options=-v" )
-
 find_package (SDL2 REQUIRED)
 find_package (SDL2_ttf REQUIRED)
 
@@ -23,8 +23,8 @@ find_package (SDL2_ttf REQUIRED)
 # Copy static files
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
-file (GLOB SOURCES "src/*.cc")
-file (GLOB CU_SOURCES "src/*.cu")
+file (GLOB_RECURSE SOURCES "src/*.cc")
+file (GLOB_RECURSE CU_SOURCES "src/*.cu")
 add_executable (${PROJECT_NAME} ${SOURCES} ${CU_SOURCES})
 #target_compile_features (${PROJECT_NAME} PUBLIC cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

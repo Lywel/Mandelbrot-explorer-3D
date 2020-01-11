@@ -1,4 +1,4 @@
-#include "mandel_2d.h"
+#include "mandelbrot.h"
 
 template<typename T>
 void check(T result, char const *const func, const char *const file, int const line)
@@ -140,7 +140,7 @@ cuda_compute_LUT(const std::uint32_t* hist, int max_iter, rgba8_t* LUT)
     }
 
     for (int i = 0; i <= max_iter; ++i)
-        LUT[i] = heat_lut((float)partial_sum[i] / partial_sum[255]);
+        LUT[i] = heat_lut((float)partial_sum[i] / partial_sum[max_iter]);
 }
 
 
@@ -161,7 +161,7 @@ cuda_apply_LUT(rgba8_t* colors, int width, int height, int max_iter,
 void
 cuda_naive_mandel_2d(rgba8_t* hostBuffer, int width, int height, float size)
 {
-    int max_iter = 255;
+    int max_iter = (1 << sizeof(std::uint8_t) * CHAR_BIT) - 1;
 
     std::uint8_t* iters;
     checkCudaErrors(cudaMalloc(&iters, width * sizeof(std::uint8_t) * height));

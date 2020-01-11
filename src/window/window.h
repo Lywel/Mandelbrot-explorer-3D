@@ -1,5 +1,6 @@
 #pragma once
-#include "color.h"
+#include "../color.h"
+#include "../engine/gui.h"
 
 #include <iostream>
 #include <iomanip>
@@ -10,20 +11,15 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-class Window
+class Window : public GUI
 {
 public:
     Window(int _width, int _height, const char* _title);
     ~Window();
 
-    void render(void* pixels);
-    bool input_pool();
-
-    void display_stat(const std::string &name, float value);
-
-    SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
-    SDL_Texture* texture = NULL;
+    void set_pixels(const void* pixels) override;
+    GUI::Event get_events(int* mouse_x, int* mouse_y) override;
+    void render() override;
 
     const int width, height;
     const char* title;
@@ -31,9 +27,10 @@ public:
 private:
     void render_infos();
 
-    std::ostringstream infos;
-
     TTF_Font* info_font = NULL;
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+    SDL_Texture* texture = NULL;
 
     Uint32 startclock = 0;
     Uint32 deltaclock = 0;

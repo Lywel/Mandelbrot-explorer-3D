@@ -17,7 +17,7 @@ Window::Window(int _width, int _height, const char* _title)
             << std::endl;
         exit(1);
     }
-    if (!(window = SDL_CreateWindow(title, 0, 0, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN)))
+    if (!(window = SDL_CreateWindow(title, 0, 0, width, height, SDL_WINDOW_OPENGL )))//| SDL_WINDOW_FULLSCREEN)))
     {
         std::cerr << "[ERROR] Could not initialize window: "
             << SDL_GetError()
@@ -49,6 +49,8 @@ Window::Window(int _width, int _height, const char* _title)
         exit(1);
     }
 
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
     startclock = SDL_GetTicks();
 }
 
@@ -60,19 +62,64 @@ Window::~Window()
     SDL_Quit();
 }
 
-bool
-Window::input_pool()
+GUI::Event
+Window::get_events(int* mouse_x, int* mouse_y)
 {
     SDL_Event e;
-    if (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {
-            return true;
+    if (SDL_PollEvent(&e))
+    {
+        if (e.type == SDL_QUIT)
+        {
+            return GUI::Event::Quit;
         }
-        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
-            return true;
+        if (e.type == SDL_KEYDOWN)
+        {
+            switch (e.key.keysym.sym)
+            {
+            case SDLK_ESCAPE:
+                return GUI::Event::Quit;
+            case SDLK_UP:
+                return GUI::Event::Forward;
+            case SDLK_DOWN:
+                return GUI::Event::Backward;
+            case SDLK_LEFT:
+                return GUI::Event::Left;
+            case SDLK_RIGHT:
+                return GUI::Event::Right;
+            }
+        }
+        if (e.type == SDL_MOUSEMOTION)
+        {
+            *mouse_x = e.motion.xrel;
+            *mouse_y = e.motion.yrel;
         }
     }
-    return false;
+    return GUI::Event::None;
+}
+
+void
+Window::set_pixels(const void* pixels)
+{
+    deltaclock = SDL_GetTicks() - startclock;
+    startclock = SDL_GetTicks();
+    if ( deltaclock != 0 )
+        currentFPS = 1000 / deltaclock;
+
+    infos
+        << "FPS: " << currentFPS << std::endl
+        << "elapsed: " << deltaclock << std::endl;
+
+    // Update with pixels
+    SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(rgba8_t));
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+}
+
+void
+Window::render()
+{
+    render_infos();
+    SDL_RenderPresent(renderer);
+    SDL_RenderClear(renderer);
 }
 
 void
@@ -105,36 +152,4 @@ Window::render_infos()
     SDL_DestroyTexture(info_texture);
     infos.str("");
     infos.clear();
-}
-
-void
-Window::render(void* pixels)
-{
-    // Compute fps
-    deltaclock = SDL_GetTicks() - startclock;
-    startclock = SDL_GetTicks();
-    if ( deltaclock != 0 )
-        currentFPS = 1000 / deltaclock;
-
-    display_stat("FPS", currentFPS);
-    display_stat("global time (ms)", deltaclock);
-
-    // Update with pixels
-    SDL_RenderClear(renderer);
-    SDL_UpdateTexture(texture, NULL, pixels, width * sizeof(rgba8_t));
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-
-    render_infos();
-
-    SDL_RenderPresent(renderer);
-}
-
-void
-Window::display_stat(const std::string &name, float value)
-{
-    infos << name << ": "
-        << std::fixed
-        << std::setprecision(2)
-        << value
-        << std::endl;
 }
