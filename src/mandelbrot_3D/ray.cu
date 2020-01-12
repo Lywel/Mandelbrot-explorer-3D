@@ -1,5 +1,6 @@
 #include "ray.h"
 
+__host__ __device__
 glm::vec2
 isphere(glm::vec4 sph, glm::vec3 ro, glm::vec3 rd)
 {
@@ -16,12 +17,14 @@ isphere(glm::vec4 sph, glm::vec3 ro, glm::vec3 rd)
     return -b + vec2(-h,h);
 }
 
+__host__ __device__
 inline float radians(float x)
 {
     return x / 180 * M_PI;
 }
 
 
+__host__ __device__
 float mandel_SDF(const vec3& sample, glm::vec4& color)
 {
     vec3 w = sample;
@@ -54,11 +57,13 @@ float mandel_SDF(const vec3& sample, glm::vec4& color)
     return 0.25*log(m)*sqrt(m)/dz;
 }
 
+__host__ __device__
 float sphere_SDF(const vec3& sample, float radius)
 {
     return glm::length(sample) - radius;
 }
 
+__host__ __device__
 float scene_SDF(const vec3& sample, glm::vec4& color)
 {
     //return sphere_SDF(sample, 1);
@@ -66,12 +71,14 @@ float scene_SDF(const vec3& sample, glm::vec4& color)
     //return compute_iter(sample, 4, max_dist, 2);
 }
 
+__host__ __device__
 float scene_SDF(const vec3& sample)
 {
     glm::vec4 o;
     return scene_SDF(sample, o);
 }
 
+__host__ __device__
 vec3 compute_normal(const vec3& pos, float px)
 {
     float e = 0.5773 * 0.25 * px;
@@ -105,6 +112,7 @@ vec3 compute_normal(const vec3& pos, float px)
 /*     return max_dist; */
 /* } */
 
+__host__ __device__
 float intersect(glm::vec3 ro, glm::vec3 rd, float px, glm::vec4& color)
 {
     float res = -1.0;
@@ -140,6 +148,7 @@ float intersect(glm::vec3 ro, glm::vec3 rd, float px, glm::vec4& color)
     return res;
 }
 
+__host__ __device__
 vec3 compute_ray_dir(float fov, int width, int height, float px, float py)
 {
     float x = px - width / 2.0f;
@@ -149,7 +158,7 @@ vec3 compute_ray_dir(float fov, int width, int height, float px, float py)
     return glm::normalize(vec3(x, y, -z));
 }
 
-
+__host__ __device__
 float softshadow(vec3 ro, vec3 rd, float k)
 {
     float res = 1.0;

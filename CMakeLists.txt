@@ -7,8 +7,8 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 # Compilation flags
-set(CXXFLAGS -Wall -Wextra -pedantic -Og -std=c++17)
-set(CUDAFLAGS "--compiler-options=-Wall -Wextra -Og")
+set(CXXFLAGS -Wall -Wextra -pedantic -ggdb -g -std=c++17)
+set(CUDAFLAGS "--compiler-options=-Wall -Wextra -ggdb -g" -G -g)
 add_compile_options(
   "$<$<COMPILE_LANGUAGE:CXX>:${CXXFLAGS}>"
   "$<$<COMPILE_LANGUAGE:CUDA>:${CUDAFLAGS}>"
