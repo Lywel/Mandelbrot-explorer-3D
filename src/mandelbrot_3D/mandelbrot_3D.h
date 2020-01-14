@@ -18,36 +18,34 @@
 #include "../engine/renderer.h"
 #include "ray.h"
 
-using namespace glm;
-
 class Mandelbrot3D : public Renderer
 {
 public:
     Mandelbrot3D(int w, int h, bool cuda_enabled);
     ~Mandelbrot3D();
-    void render(Pixel* target, const mat4& cam) override;
+    void render(Pixel* target, const glm::mat4& cam) override;
 
 private:
     bool gpu = false;
 
-    void cpu_render(Pixel* target, const mat4& cam);
-    void cuda_render(Pixel* target, const mat4& cam);
+    void cpu_render(Pixel* target, const glm::mat4& cam);
+    void cuda_render(Pixel* target, const glm::mat4& cam);
     void cuda_init();
     void cuda_dinit();
 
-    vec3 render_px(const vec2& px, const mat4& cam);
+    glm::vec3 render_px(const glm::vec2& px, const glm::mat4& cam);
 
     const int width;
     const int height;
 
-    mat4 last_cam = mat4(0);
-    Pixel* colors;
+    glm::mat4 last_cam = glm::mat4(0);
+    char* colors;
+    size_t pitch;
 };
 
-float compute_iter(const vec3& pos, int max_iter, float max_val, int exponent);
+float compute_iter(const glm::vec3& pos, int max_iter, float max_val, int exponent);
 
-vec3 render(const vec2& p, const vec2& resolution, const mat4 cam);
-//void cuda_render_px(Renderer::Pixel* colors, int width, int height, const mat4& cam);
+glm::vec3 render(const glm::vec2& p, const glm::vec2& resolution, const glm::mat4 cam);
 
 template<typename T>
 void check(T result, char const *const func, const char *const file, int const line);

@@ -6,20 +6,18 @@
 #include <glm/geometric.hpp>
 #include <glm/matrix.hpp>
 
-using namespace glm;
+glm::vec2 isphere(glm::vec4 sph, glm::vec3 ro, glm::vec3 rd);
 
-vec2 isphere(vec4 sph, vec3 ro, vec3 rd);
+float mandel_SDF(const glm::vec3& sample, glm::vec4& color);
+float sphere_SDF(const glm::vec3& sample, float radius);
+float scene_SDF(const glm::vec3& sample, glm::vec4& color);
+float scene_SDF(const glm::vec3& sample);
 
-float mandel_SDF(const vec3& sample, vec4& color);
-float sphere_SDF(const vec3& sample, float radius);
-float scene_SDF(const vec3& sample, vec4& color);
-float scene_SDF(const vec3& sample);
+float softshadow(glm::vec3 ro, glm::vec3 rd, float k);
 
-float softshadow(vec3 ro, vec3 rd, float k);
+glm::vec3 compute_normal(const glm::vec3& pos, float px);
+glm::vec3 compute_ray_dir(float fov, int width, int height, float px, float py);
+float intersect(glm::vec3 ro, glm::vec3 rd, float px, glm::vec4* color);
+float intersec(glm::vec3 ro, glm::vec3 rd, float px, glm::vec4* color);
 
-vec3 compute_normal(const vec3& pos, float px);
-vec3 compute_ray_dir(float fov, int width, int height, float px, float py);
-float intersect(vec3 ro, vec3 rd, float px, vec4* color);
-float intersec(vec3 ro, vec3 rd, float px, vec4* color);
-
-/* float dist_to_surface(const vec3& eye, const vec3& dir); */
+/* float dist_to_surface(const glm::vec3& eye, const glm::vec3& dir); */
