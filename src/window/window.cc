@@ -86,6 +86,8 @@ Window::get_events(int* mouse_x, int* mouse_y)
                 return GUI::Event::Left;
             case SDLK_RIGHT:
                 return GUI::Event::Right;
+            case SDLK_SPACE:
+                return GUI::Event::ToggleAnimate;
             }
         }
         if (e.type == SDL_MOUSEMOTION)

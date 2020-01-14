@@ -16,7 +16,7 @@
 class Engine
 {
 public:
-    Engine(int width, int height);
+    Engine(int width, int height, bool autoplay);
     ~Engine();
 
     void run(GUI* gui, Renderer* renderer);
@@ -35,6 +35,7 @@ private:
 
     std::chrono::high_resolution_clock::time_point last_frame{std::chrono::high_resolution_clock::now()};
     float time = 0;
+    bool running = false;
 
     Renderer::Pixel* pixels;
 };

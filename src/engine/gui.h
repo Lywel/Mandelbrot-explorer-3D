@@ -12,7 +12,8 @@ public:
         Forward,
         Backward,
         Left,
-        Right
+        Right,
+        ToggleAnimate
     };
     virtual void set_pixels(const void* pixels) = 0;
     virtual Event get_events(int* mouse_x, int* mouse_y) = 0;

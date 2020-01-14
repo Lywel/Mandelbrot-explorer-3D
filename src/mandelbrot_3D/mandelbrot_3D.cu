@@ -284,7 +284,7 @@ render(const glm::vec2& p, const glm::vec2& resolution, const glm::mat4 cam)
              lin += 6.0f * glm::vec3(1.50f,1.10f,0.70f) * dif1;
              lin += 4.0f * glm::vec3(0.25f,0.20f,0.15f) * dif2;
              lin += 1.5f * glm::vec3(0.10f,0.20f,0.30f) * dif3;
-             lin += 3.5f * glm::vec3(0.35f, 0.30f, 0.25f) * (0.05f + 0.95f * occ); // ambient
+             lin += 4.5f * glm::vec3(0.35f, 0.30f, 0.25f) * (0.05f + 0.95f * occ); // ambient
              lin += 4.0f * fac * occ;                          // fake SSS
         col *= lin;
 

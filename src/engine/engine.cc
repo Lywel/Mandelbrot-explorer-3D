@@ -1,15 +1,17 @@
 #include "engine.h"
 
-Engine::Engine(int width, int height)
+Engine::Engine(int width, int height, bool autoplay)
+    : running(autoplay)
 {
     pixels = new Renderer::Pixel[width * height];
-    glm::vec3 direction;
+    auto_move(0);
+    /* glm::vec3 direction; */
 
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    forward = normalize(direction);
-    cam = glm::lookAt(position, position + forward, up);
+    /* direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch)); */
+    /* direction.y = sin(glm::radians(pitch)); */
+    /* direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch)); */
+    /* forward = normalize(direction); */
+    /* cam = glm::lookAt(position, position + forward, up); */
 }
 
 Engine::~Engine()
@@ -35,27 +37,32 @@ Engine::handle_event(const GUI::Event ev, int mouse_x, int mouse_y) {
     case GUI::Event::Right:
         position += normalize(cross(forward, up)) * speed;
         break;
+    case GUI::Event::ToggleAnimate:
+        running = !running;
+        if (running)
+
+        break;
     default:
         break;
     }
 
-    if (mouse_x > 1 || mouse_y > 1)
-    {
-        yaw += mouse_x * sensivity;
-        pitch += mouse_y * sensivity;
+    /* if (mouse_x > 1 || mouse_y > 1) */
+    /* { */
+    /*     yaw += mouse_x * sensivity; */
+    /*     pitch += mouse_y * sensivity; */
 
-        if (pitch > 89.0f)
-            pitch =  89.0f;
-        if (pitch < -89.0f)
-            pitch = -89.0f;
+    /*     if (pitch > 89.0f) */
+    /*         pitch =  89.0f; */
+    /*     if (pitch < -89.0f) */
+    /*         pitch = -89.0f; */
 
-        glm::vec3 direction;
+    /*     glm::vec3 direction; */
 
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        forward = normalize(direction);
-    }
+    /*     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch)); */
+    /*     direction.y = sin(glm::radians(pitch)); */
+    /*     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch)); */
+    /*     forward = normalize(direction); */
+    /* } */
 }
 
 #include <glm/gtx/string_cast.hpp>
@@ -103,8 +110,10 @@ Engine::run(GUI* gui, Renderer* renderer)
 
         int mx = 0, my = 0;
         ev = gui->get_events(&mx, &my);
-        /* handle_event(ev, mx, my); */
-        auto_move(elapsed.count());
+        handle_event(ev, mx, my);
+
+        if (running)
+            auto_move(elapsed.count());
 
         last_frame = current_frame;
     }

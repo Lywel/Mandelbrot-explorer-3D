@@ -17,9 +17,11 @@ main(int argc, char** argv)
     int width = 640;
     int height = 480;
     bool gpu = false;
+    bool autoplay = false;
 
     CLI::App app{argv[0]};
     app.add_flag("--gpu,!--no-gpu", gpu, "Enable CUDA (if available)");
+    app.add_flag("--autoplay,-A", gpu, "Starts the animation");
     app.add_set("-d", mode, {"3D", "2D"}, "Fractal type. Either '3D' or '2D'");
     app.add_option("width", width, "Width of the window");
     app.add_option("height", height, "Height of the window");
@@ -29,7 +31,7 @@ main(int argc, char** argv)
     bool cuda_enabled = gpu_available(true);
 
     Window gui (width, height, "SDL window");
-    Engine engine(width, height);
+    Engine engine(width, height, autoplay);
 
     if (mode == "3D")
     {
