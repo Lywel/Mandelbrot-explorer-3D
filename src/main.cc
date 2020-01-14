@@ -16,13 +16,11 @@ main(int argc, char** argv)
     std::string mode = "3D";
     int width = 640;
     int height = 480;
-    int niter = 100;
     bool gpu = false;
 
     CLI::App app{argv[0]};
     app.add_flag("--gpu,!--no-gpu", gpu, "Enable CUDA (if available)");
     app.add_set("-d", mode, {"3D", "2D"}, "Fractal type. Either '3D' or '2D'");
-    app.add_option("niter", niter, "Number of iteration");
     app.add_option("width", width, "Width of the window");
     app.add_option("height", height, "Height of the window");
 

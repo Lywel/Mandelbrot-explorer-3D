@@ -14,8 +14,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(CLI11)
 
 # Compilation flags
-set(CXXFLAGS -Wall -Wextra -pedantic -O5 -std=c++17)
-set(CUDAFLAGS "--compiler-options=-Wall -Wextra -O5")
+set(CXXFLAGS -Wall -Wextra -pedantic -O5 -std=c++17 -lineinfo)
+set(CUDAFLAGS "--compiler-options=-Wall -Wextra -O5 -lineinfo" --std=c++14 --maxrregcount=32 --generate-line-info --use_fast_math)
 #set(CXXFLAGS -Wall -Wextra -pedantic -ggdb -g -std=c++17)
 #set(CUDAFLAGS "--compiler-options=-Wall -Wextra -ggdb -lineinfo" -G -g)
 add_compile_options(

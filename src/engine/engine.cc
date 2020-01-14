@@ -65,7 +65,7 @@ Engine::auto_move(int elapsed_ms)
     time += elapsed_ms / 1000.f;
 
 // camera
-    float di = 1.4 + 0.1 * cos(.29 * time) + 2;
+    float di = 1.4 + 0.1 * cos(.29 * time) + 1.5;
     glm::vec3  ro = di * glm::vec3( cos(.33*time), 0.8*sin(.37*time), sin(.31*time) );
     glm::vec3  ta = glm::vec3(0.0,0.1,0.0);
     float cr = 0.5*cos(0.1*time);

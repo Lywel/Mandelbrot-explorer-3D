@@ -54,9 +54,9 @@ float mandel_SDF(const glm::vec3& sample, glm::vec4& color)
 
     glm::vec4 trap = glm::vec4(glm::abs(w), m);
 
-    float dz = 1.0f;
+    float dz = 1.5f;
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 6; ++i)
     {
         float m2 = m*m;
         float m4 = m2*m2;
@@ -197,7 +197,7 @@ float softshadow(glm::vec3 ro, glm::vec3 rd, float k)
     for (int i=0; i < 64; i++)
     {
         float h = scene_SDF(ro + rd * t);
-        res = min(res, k * h / t);
+        res = fminf(res, k * h / t);
         if (res < 0.001f)
             break;
         t += clamp(h, 0.01f, 0.2f);
@@ -254,14 +254,15 @@ render(const glm::vec2& p, const glm::vec2& resolution, const glm::mat4 cam)
         // color
         col = glm::vec3(0.01);
 
-        //col = mix(col, glm::vec3(0.10,0.20,0.30), clamp(tra.y, 0.f, 1.f) );
-        //col = mix(col, glm::vec3(0.02,0.10,0.30), clamp(tra.z*tra.z, 0.f, 1.f) );
-        //col = mix(col, glm::vec3(0.30,0.10,0.02), clamp(powf(tra.w,6.0), 0.f, 1.f) );
-        col = mix(col, glm::vec3(0.2f, 0.01f, 0.01f), clamp(tra.y, 0.f, 1.f) );
-        col = mix(col, glm::vec3(0.01f, 0.2f, 0.01f), clamp(tra.z*tra.z, 0.f, 1.f) );
-        col = mix(col, glm::vec3(0.01f, 0.01f, 0.2f), clamp(powf(tra.w, 6.f), 0.f, 1.f) );
+        col = mix(col, glm::vec3(0.10,0.20,0.30), clamp(tra.y, 0.f, 1.f) );
+        col = mix(col, glm::vec3(0.02,0.10,0.30), clamp(tra.z*tra.z, 0.f, 1.f) );
+        col = mix(col, glm::vec3(0.30,0.10,0.02), clamp(powf(tra.w,6.0), 0.f, 1.f) );
+        /* col = mix(col, glm::vec3(0.2f, 0.01f, 0.01f), clamp(tra.y, 0.f, 1.f) ); */
+        /* col = mix(col, glm::vec3(0.01f, 0.2f, 0.01f), clamp(tra.z*tra.z, 0.f, 1.f) ); */
+        /* col = mix(col, glm::vec3(0.01f, 0.01f, 0.2f), clamp(powf(tra.w, 6.f), 0.f, 1.f) ); */
         col *= 0.5;
 
+#if FANCY
         // lighting terms
         glm::vec3 hit = ro + dist * rd;
         glm::vec3 nor = compute_normal(hit, px);
@@ -289,11 +290,12 @@ render(const glm::vec2& p, const glm::vec2& resolution, const glm::mat4 cam)
 
         col = glm::pow(col, glm::vec3(0.7f, 0.9f, 1.0));
         col += spe1 * 5.0f;
+#endif
     }
 
     col = glm::sqrt(col);
 
-    col *= 1.f - 0.05f * glm::length(sp);
+    col *= 1.f - 0.06f * glm::length(sp);
 
     return col;
 }
@@ -307,10 +309,24 @@ cuda_render_px(char* colors, int width, int height, size_t pitch, const glm::mat
     if (x >= width || y >= height)
         return;
 
+#if FANCY
+    vec3 col(0.0);
+
+    float aa = 3;
+    for (int j=0; j < aa; j++)
+    {
+        for (int i=0; i < aa; i++)
+        {
+            glm::vec2 xy = glm::vec2(x, y) + (glm::vec2(i, j) / aa);
+            col += ::render(xy, glm::vec2(width, height), cam);
+        }
+        col /= aa * aa;
+    }
+#else
     glm::vec3 col = ::render(glm::vec2(x, y), glm::vec2(width, height), cam);
+#endif
+
     Renderer::Pixel* lineptr = (Renderer::Pixel*)(colors + y * pitch);
-
-
     lineptr[x] = Renderer::Pixel{col.x * 255.f, col.y * 255.f, col.z * 255.f, 255};
 }
 
@@ -333,7 +349,6 @@ Mandelbrot3D::cuda_render(Pixel* target, const glm::mat4& cam)
     if (cam == last_cam)
         return;
     last_cam = cam;
-
 
     {
         int bsize = 16;
