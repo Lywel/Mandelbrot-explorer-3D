@@ -1,5 +1,8 @@
 #include "mandelbrot.h"
 
+const float mandel_center_x = -1.401155; // -0.1011;
+const float mandel_center_y = 0; // 0.9563;
+
 template<typename T>
 void check(T result, char const *const func, const char *const file, int const line)
 {
@@ -14,7 +17,7 @@ void check(T result, char const *const func, const char *const file, int const l
     }
 }
 
-__host__ __device__ rgba8_t
+__host__ __device__ Renderer::Pixel
 heat_lut(float x)
 {
   assert(0 <= x && x <= 1);
@@ -25,26 +28,26 @@ heat_lut(float x)
   if (x < x0)
   {
     auto g = static_cast<std::uint8_t>(x / x0 * 255);
-    return rgba8_t{0, g, 255, 255};
+    return Renderer::Pixel{0, g, 255, 255};
   }
   else if (x < x1)
   {
     auto b = static_cast<std::uint8_t>((x1 - x) / x0 * 255);
-    return rgba8_t{0, 255, b, 255};
+    return Renderer::Pixel{0, 255, b, 255};
   }
   else if (x < x2)
   {
     auto r = static_cast<std::uint8_t>((x - x1) / x0 * 255);
-    return rgba8_t{r, 255, 0, 255};
+    return Renderer::Pixel{r, 255, 0, 255};
   }
   else if (x < 1.f)
   {
     auto b = static_cast<std::uint8_t>((1.f - x) / x0 * 255);
-    return rgba8_t{255, b, 0, 255};
+    return Renderer::Pixel{255, b, 0, 255};
   }
   else
   {
-    return rgba8_t{0, 0, 0, 255};
+    return Renderer::Pixel{0, 0, 0, 255};
   }
 }
 
@@ -83,7 +86,7 @@ cpu_naive_mandel_iter(std::uint8_t* iters, int width, int height, int max_iter, 
 
 
 __host__ void
-cpu_naive_mandel_2d(rgba8_t* pix, int width, int height, float size)
+Mandelbrot2D::cpu_naive_mandel_2d(Pixel* pix, float size)
 {
     std::uint8_t* iters = new std::uint8_t[width * height];
     cpu_naive_mandel_iter(iters, width, height, 255, size);
@@ -128,7 +131,7 @@ cuda_compute_hist(const std::uint8_t* iters, int width, int height, int max_iter
 
 
 __global__ void
-cuda_compute_LUT(const std::uint32_t* hist, int max_iter, rgba8_t* LUT)
+cuda_compute_LUT(const std::uint32_t* hist, int max_iter, Renderer::Pixel* LUT)
 {
     std::uint32_t partial_sum[256];
 
@@ -146,8 +149,8 @@ cuda_compute_LUT(const std::uint32_t* hist, int max_iter, rgba8_t* LUT)
 
 
 __global__ void
-cuda_apply_LUT(rgba8_t* colors, int width, int height, int max_iter,
-    std::uint8_t* iters, const rgba8_t* LUT)
+cuda_apply_LUT(Renderer::Pixel* colors, int width, int height, int max_iter,
+    std::uint8_t* iters, const Renderer::Pixel* LUT)
 {
     int x = blockDim.x * blockIdx.x + threadIdx.x;
     int y = blockDim.y * blockIdx.y + threadIdx.y;
@@ -159,21 +162,17 @@ cuda_apply_LUT(rgba8_t* colors, int width, int height, int max_iter,
 }
 
 void
-cuda_naive_mandel_2d(rgba8_t* hostBuffer, int width, int height, float size)
+Mandelbrot2D::cuda_naive_mandel_2d(Pixel* hostBuffer, float size)
 {
-    int max_iter = (1 << sizeof(std::uint8_t) * CHAR_BIT) - 1;
-
     std::uint8_t* iters;
-    checkCudaErrors(cudaMalloc(&iters, width * sizeof(std::uint8_t) * height));
-
-    rgba8_t* colors;
-    checkCudaErrors(cudaMalloc(&colors, width * sizeof(rgba8_t) * height));
-
+    Pixel* colors;
     std::uint32_t* hist;
-    checkCudaErrors(cudaMalloc(&hist, sizeof(std::uint32_t) * (max_iter + 1)));
+    Pixel* LUT;
 
-    rgba8_t* LUT;
-    checkCudaErrors(cudaMalloc(&LUT, sizeof(rgba8_t) * (max_iter + 1)));
+    checkCudaErrors(cudaMalloc(&iters, width * sizeof(std::uint8_t) * height));
+    checkCudaErrors(cudaMalloc(&colors, width * sizeof(Pixel) * height));
+    checkCudaErrors(cudaMalloc(&hist, sizeof(std::uint32_t) * (max_iter + 1)));
+    checkCudaErrors(cudaMalloc(&LUT, sizeof(Pixel) * (max_iter + 1)));
 
     {
         int bsize = 32;
@@ -196,11 +195,34 @@ cuda_naive_mandel_2d(rgba8_t* hostBuffer, int width, int height, float size)
     }
 
     // Copy back to main memory
-    checkCudaErrors(cudaMemcpy(hostBuffer, colors, width * sizeof(rgba8_t) * height, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(hostBuffer, colors, width * sizeof(Pixel) * height, cudaMemcpyDeviceToHost));
 
-    // Free
     checkCudaErrors(cudaFree(LUT));
     checkCudaErrors(cudaFree(hist));
     checkCudaErrors(cudaFree(iters));
     checkCudaErrors(cudaFree(colors));
+}
+
+
+Mandelbrot2D::Mandelbrot2D(int w, int h, bool gpu_enabled)
+    : width(w), height(h), gpu(gpu_enabled)
+{
+    max_iter = (1 << sizeof(std::uint8_t) * CHAR_BIT) - 1;
+    std::cout << "gpu enabled: " << (gpu ? "yes" : "no") << std::endl;
+}
+
+Mandelbrot2D::~Mandelbrot2D()
+{
+}
+
+void Mandelbrot2D::render(Pixel* target, const mat4& cam)
+{
+    if (gpu)
+    {
+        cuda_naive_mandel_2d(target, cam[0].w * -2);
+    }
+    else
+    {
+        cpu_naive_mandel_2d(target, cam[0].w * -2);
+    }
 }

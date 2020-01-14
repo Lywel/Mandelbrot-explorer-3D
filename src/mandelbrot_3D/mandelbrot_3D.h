@@ -1,6 +1,5 @@
 #pragma once
 #include <algorithm>
-#include <cmath>
 #include <iostream>
 
 //#define GLM_FORCE_CUDA 1
@@ -24,25 +23,30 @@ using namespace glm;
 class Mandelbrot3D : public Renderer
 {
 public:
-    Mandelbrot3D(int w, int h, int i=100);
+    Mandelbrot3D(int w, int h, bool cuda_enabled);
+    ~Mandelbrot3D();
     void render(Pixel* target, const mat4& cam) override;
 
 private:
+    bool gpu = false;
+
     void cpu_render(Pixel* target, const mat4& cam);
     void cuda_render(Pixel* target, const mat4& cam);
- 
+    void cuda_init();
+    void cuda_dinit();
+
     vec3 render_px(const vec2& px, const mat4& cam);
 
     const int width;
     const int height;
-    const int max_iter;
 
     mat4 last_cam = mat4(0);
+    Pixel* colors;
 };
 
 float compute_iter(const vec3& pos, int max_iter, float max_val, int exponent);
 
-vec3 render(const vec2& p, const vec2& resolution, const mat4& cam);
+vec3 render(const vec2& p, const vec2& resolution, const mat4 cam);
 //void cuda_render_px(Renderer::Pixel* colors, int width, int height, const mat4& cam);
 
 template<typename T>

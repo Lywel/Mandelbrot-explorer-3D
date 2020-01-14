@@ -2,17 +2,27 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-Mandelbrot3D::Mandelbrot3D(int w, int h, int i)
-    : width(w), height(h), max_iter(i)
+Mandelbrot3D::Mandelbrot3D(int w, int h, bool cuda_enabled)
+    : width(w), height(h), gpu(cuda_enabled)
 {
+    if (gpu)
+        cuda_init();
+}
+
+Mandelbrot3D::~Mandelbrot3D()
+{
+    if (gpu)
+        cuda_dinit();
 }
 
 void
 Mandelbrot3D::render(Pixel* target, const mat4& cam)
 {
     // cuda_naive_mandel_2d((rgba8_t*)target, width, height, pos.z);
-    cpu_render(target, cam);
-    // cuda_render(target, cam);
+    if (gpu)
+        cuda_render(target, cam);
+    else
+        cpu_render(target, cam);
 }
 
 vec3 Mandelbrot3D::render_px(const vec2& px, const mat4& cam)
